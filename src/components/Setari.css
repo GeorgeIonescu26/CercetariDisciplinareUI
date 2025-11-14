@@ -1,0 +1,41 @@
+.setari-panel {
+  background-color: #0f172a;
+  padding: 16px;
+  border-radius: 12px;
+  color: #e5eaf3;
+}
+
+.setari-panel h1 {
+  margin-top: 0;
+}
+
+.setari-panel label {
+  display: block;
+  margin: 12px 0;
+}
+
+.setari-panel input[type="password"] {
+  width: 100%;
+  padding: 8px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,.2);
+  background: #0c162b;
+  color: #e5eaf3;
+  margin-top: 4px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.btn-save {
+  margin-top: 12px;
+  padding: 8px 16px;
+  background-color: #3b82f6;
+  border: none;
+  border-radius: 8px;
+  color: #e5eaf3;
+  cursor: pointer;
+}

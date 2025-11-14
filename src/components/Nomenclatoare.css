@@ -1,0 +1,46 @@
+.nomenclatoare {
+  width: 100%;
+}
+
+.nomenclator-tabs {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 24px;
+  flex-wrap: wrap;
+}
+
+.nomenclator-tab {
+  padding: 10px 20px;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: var(--panel);
+  color: var(--text-dim);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.nomenclator-tab:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+
+.nomenclator-tab.active {
+  background: var(--accent);
+  color: white;
+  border-color: var(--accent);
+  font-weight: 600;
+}
+
+@media (max-width: 768px) {
+  .nomenclator-tabs {
+    flex-direction: column;
+  }
+
+  .nomenclator-tab {
+    width: 100%;
+    text-align: center;
+  }
+}
