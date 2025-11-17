@@ -1,0 +1,125 @@
+/* ===== LOGIN STYLE (DARK THEME LIKE DASHBOARD) ===== */
+
+.login-page {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    width: 100%;
+    background: #0c162b; /* același background ca în dashboard */
+}
+
+.login-card {
+    background: #111b2d; /* panel dark */
+    padding: 40px 30px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.5); /* shadow ca restul aplicației */
+    width: 350px;
+    text-align: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-title {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #ffffff; /* text alb */
+    font-weight: 700;
+    letter-spacing: 1px;
+}
+
+.login-title::after {
+    content: '';
+    display: block;
+    width: 60px;
+    height: 4px;
+    background: var(--accent); /* highlight albastru */
+    margin: 12px auto 0 auto;
+    border-radius: 2px;
+}
+
+.input-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 18px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    border-radius: 8px;
+    padding: 10px;
+    background: #0c162b; /* fundal input */
+    transition: 0.2s ease;
+}
+
+.input-group:focus-within {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.input-icon {
+    margin-right: 10px;
+    color: rgba(255, 255, 255, 0.6);
+    transition: color 0.2s ease;
+}
+
+.input-group:focus-within .input-icon {
+    color: var(--accent);
+}
+
+input {
+    border: none;
+    outline: none;
+    flex: 1;
+    background: transparent;
+    font-size: 14px;
+    color: #fff;
+}
+
+input::placeholder {
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.login-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    background: var(--accent);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: 600;
+    transition: 0.2s ease;
+}
+
+.login-btn:hover {
+    background: var(--accent-hover);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+}
+
+.manual-btn {
+    display: block;
+    margin-top: 18px;
+    padding: 10px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 600;
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: 0.25s;
+}
+
+.manual-btn:hover {
+    background: rgba(255, 255, 255, 0.12);
+    transform: translateY(-2px);
+}
+
+.error-text {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ff8a8a;
+    padding: 10px 15px;
+    border-radius: 8px;
+    font-size: 14px;
+    margin: 10px auto 20px auto;
+    animation: buzz 0.3s ease-in-out 1;
+}

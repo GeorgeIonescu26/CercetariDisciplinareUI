@@ -115,10 +115,12 @@
 
 /* Modal Body */
 .modal-body {
-  flex: 1;
-  padding: 28px;
+  max-height: 70vh;
   overflow-y: auto;
+  padding-left: 20px;
+  padding-right: 10px;
 }
+
 
 .form-section {
   animation: fadeIn 0.3s ease-out;
@@ -300,10 +302,6 @@
 
   .modal-nav-item span:not(.icon) {
     display: none;
-  }
-
-  .modal-body {
-    padding: 20px;
   }
 
   .form-grid {
