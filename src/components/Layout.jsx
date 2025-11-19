@@ -1,14 +1,17 @@
-// src/components/Layout.jsx
-import React, { useState } from "react";
-import Sidebar from "./Sidebar/Sidebar";
+import React from 'react';
+import Sidebar from './Sidebar/Sidebar';
+import './Layout.css';
+import { Outlet } from 'react-router-dom';
 
-export default function Layout({ children }) {
-  const [activeSection, setActiveSection] = useState("dashboard");
-
+const Layout = () => {
   return (
     <div className="app">
-      <Sidebar activeSection={activeSection} setActiveSection={setActiveSection} />
-      <main className="content">{children}</main>
+      <Sidebar />
+      <main className="content">
+        <Outlet />
+      </main>
     </div>
   );
-}
+};
+
+export default Layout;

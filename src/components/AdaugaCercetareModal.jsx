@@ -73,7 +73,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     // Construiește obiectul pentru API bazat pe CercetariPolitistiRequestCreate
@@ -145,9 +145,36 @@ const AdaugaCercetareModal = ({ onClose }) => {
     };
 
     console.log('Date cercetare pentru salvare:', cercetareData);
-    
+   
     // Aici vei face call-ul API
     // await createCercetare(cercetareData);
+
+    try
+    {
+      const apiURL = "https://localhost:44381/api/CercetariDisciplinareIntegration/Adauga-Cercetare";
+      const response = await fetch(apiURL, 
+      { method : "POST",
+        headers: { "Content-Type": "application/json" },
+
+      })  
+    if (!response.ok) {
+      // Dacă serverul răspunde cu status 4xx sau 5xx (eroare)
+      let errorMessage = `Eroare server (${response.status})`;
+      
+      // Încercăm să citim un mesaj de eroare din corpul răspunsulu
+        const errorData = await response.json();
+        if (errorData.title) {
+          errorMessage += `: ${errorData.title}`; // Folosim titlul din payload-ul JSON
+        }
+    } 
+
+}
+catch (e) {
+        // Ignorăm, dacă corpul nu e JSON valid
+      
+      
+      throw new Error(errorMessage);
+    }
     
     alert('Cercetare adăugată cu succes!');
     onClose();
@@ -155,7 +182,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
 
   const cautaInDEPABD = (tip) => {
     const cnp = tip === 'cercetat' ? formData.cercettatCNP : formData.desemnatCNP;
-    
+     debugger;
     if (!cnp) {
       alert('Introduceți CNP-ul pentru căutare');
       return;

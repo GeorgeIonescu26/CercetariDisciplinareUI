@@ -7,7 +7,7 @@ const Politisti = () => {
     { id: 2, grad: 'Comisar', nume: 'Popescu', prenume: 'Andrei', unitate: 'Cluj' },
     { id: 3, grad: 'Inspector', nume: 'Dumitrescu', prenume: 'Maria', unitate: 'Timișoara' }
   ]);
-
+ 
   const [searchTerm, setSearchTerm] = useState('');
   const [formData, setFormData] = useState({
     grad: '',
@@ -34,7 +34,7 @@ const Politisti = () => {
     setFormData({ grad: '', nume: '', prenume: '', unitate: '' });
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = (id) => { debugger;
     if (window.confirm('Sigur doriți să ștergeți acest polițist?')) {
       setPolitisti(politisti.filter(p => p.id !== id));
     }

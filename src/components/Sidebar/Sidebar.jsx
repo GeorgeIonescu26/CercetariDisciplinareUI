@@ -1,14 +1,21 @@
 import React from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import './Sidebar.css';
 
-const Sidebar = ({ activeSection, setActiveSection }) => {
+const Sidebar = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊' },
-    { id: 'politisti', label: 'Polițiști', icon: '👮' },
-    { id: 'nomenclatoare', label: 'Nomenclatoare', icon: '📋' },
-    { id: 'rapoarte', label: 'Rapoarte', icon: '📈' },
-    { id: 'setari', label: 'Setări', icon: '⚙️' }
+    { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
+    { id: 'politisti', label: 'Polițiști', icon: '👮', path: '/politisti' },
+    { id: 'nomenclatoare', label: 'Nomenclatoare', icon: '📋', path: '/nomenclatoare' },
+    { id: 'rapoarte', label: 'Rapoarte', icon: '📈', path: '/rapoarte' },
+    { id: 'setari', label: 'Setări', icon: '⚙️', path: '/setari' }
   ];
+
+  // Determină secțiunea activă din URL
+  const activeSection = location.pathname;
 
   return (
     <aside className="sidebar">
@@ -19,20 +26,18 @@ const Sidebar = ({ activeSection, setActiveSection }) => {
 
       <nav className="menu">
         {menuItems.map(item => (
-  <a
-    key={item.id}
-    href={`#${item.id}`}
-    className={`menu-item ${activeSection === item.id ? 'active' : ''}`}
-    onClick={(e) => {
-      e.preventDefault();
-      setActiveSection(item.id);
-    }}
-  >
-    <span className="icon">{item.icon}</span>
-    <span>{item.label}</span>
-  </a>
-))}
-
+          <button
+            key={item.id}
+            className={`menu-item ${activeSection === item.path ? 'active' : ''}`}
+            onClick={() => {
+              console.log('Navigating to:', item.path); // DEBUG
+              navigate(item.path);
+            }}
+          >
+            <span className="icon">{item.icon}</span>
+            <span>{item.label}</span>
+          </button>
+        ))}
       </nav>
 
       <div className="sidebar-footer">
