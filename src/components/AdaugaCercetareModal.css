@@ -190,14 +190,28 @@
   font-size: 14px;
   transition: var(--transition);
   font-family: inherit;
+  line-height: 1.5; /* ✅ ADĂUGAT - previne tăierea textului */
 }
 
-.form-group input:focus,
-.form-group select:focus,
-.form-group textarea:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+.select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa3b2' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+  padding-right: 36px;
+  height: 42px; /* ✅ ADĂUGAT - înălțime fixă */
+  display: flex; /* ✅ ADĂUGAT - pentru centrare verticală */
+  align-items: center; /* ✅ ADĂUGAT */
+  overflow: visible; /* ✅ ADĂUGAT - asigură că textul nu e tăiat */
+}
+
+/* Asigură-te că opțiunile din dropdown arată bine */
+.form-group select option {
+  padding: 8px 12px;
+  background: #0c162b;
+  color: var(--text);
+  line-height: 1.6;
 }
 
 .form-group input::placeholder,
@@ -209,15 +223,6 @@
   resize: vertical;
   min-height: 100px;
   line-height: 1.6;
-}
-
-.select {
-  cursor: pointer;
-  appearance: none;
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa3b2' d='M6 9L1 4h10z'/%3E%3C/svg%3E");
-  background-repeat: no-repeat;
-  background-position: right 12px center;
-  padding-right: 36px;
 }
 
 /* DEPABD Search */

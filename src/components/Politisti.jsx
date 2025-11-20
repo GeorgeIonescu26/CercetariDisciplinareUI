@@ -34,7 +34,7 @@ const Politisti = () => {
     setFormData({ grad: '', nume: '', prenume: '', unitate: '' });
   };
 
-  const handleDelete = (id) => { debugger;
+  const handleDelete = (id) => { 
     if (window.confirm('Sigur doriți să ștergeți acest polițist?')) {
       setPolitisti(politisti.filter(p => p.id !== id));
     }
