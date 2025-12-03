@@ -54,34 +54,33 @@ const AdaugaCercetareModal = ({ onClose }) => {
     solutieRestituireId: ''
   });
 
-  // State pentru liste de polițiști
-  const [politistiCercetati, setPolitistiCercetati] = useState([{
-    id: Date.now(),
-    politistId: '',
-    cnp: '',
-    grad: '',
-    nume: '',
-    prenume: '',
-    unitate: '',
-    functie: '',
-    corp: '',
-    domeniu: '',
-    rolId: ''
-  }]);
+ const [politistiCercetati, setPolitistiCercetati] = useState([{
+  _id: Date.now(), // ID TEMPORAR PENTRU REACT (nu se trimite la backend)
+  grad: '',
+  nume: '',
+  prenume: '',
+  functie: '',
+  corp: '',
+  domeniu: '',
+  unitate: '',
+  avizJudiciar: '',
+  cnp: '', // Păstrăm CNP pentru căutare
+  rolId: '' // Păstrăm Rol pentru logică
+}]);
 
-  const [politistiDesemnati, setPolitistiDesemnati] = useState([{
-    id: Date.now(),
-    politistId: '',
-    cnp: '',
-    grad: '',
-    nume: '',
-    prenume: '',
-    unitate: '',
-    functie: '',
-    corp: '',
-    domeniu: '',
-    rolId: ''
-  }]);
+const [politistiDesemnati, setPolitistiDesemnati] = useState([{
+  _id: Date.now() + 1, // ID TEMPORAR UNIC
+  grad: '',
+  nume: '',
+  prenume: '',
+  functie: '',
+  corp: '',
+  domeniu: '',
+  unitate: '',
+  avizJudiciar: '',
+  cnp: '',
+  rolId: ''
+}]);
 
   // State pentru nomenclatoare
   const [nomenclatoare, setNomenclatoare] = useState({
@@ -149,105 +148,81 @@ const AdaugaCercetareModal = ({ onClose }) => {
   };
 
   // Funcții pentru gestionarea polițiștilor cercetați
-  const handleCercetatChange = (id, field, value) => {
-    setPolitistiCercetati(prev => 
-      prev.map(politist => 
-        politist.id === id ? { ...politist, [field]: value } : politist
-      )
-    );
-  };
-
-  const adaugaCercetat = () => {
-  setPolitistiCercetati(prev => [{
-    id: Date.now(),
-    politistId: '',
-    cnp: '',
-    grad: '',
-    nume: '',
-    prenume: '',
-    unitate: '',
-    functie: '',
-    corp: '',
-    domeniu: '',
-    rolId: ''
-  }, ...prev]);  // Adaugă la început cu spread operator
+  const handleCercetatChange = (_id, field, value) => {
+  setPolitistiCercetati(prev => 
+    prev.map(p => p._id === _id ? { ...p, [field]: value } : p)
+  );
 };
 
-  const stergeCercetat = (id) => {
-    if (politistiCercetati.length > 1) {
-      setPolitistiCercetati(prev => prev.filter(politist => politist.id !== id));
-    } else {
-      alert('Trebuie să existe cel puțin un polițist cercetat!');
-    }
-  };
+const adaugaCercetat = () => {
+  setPolitistiCercetati(prev => [{
+    _id: Date.now(), // Generăm ID unic pe moment
+    cnp: '', grad: '', nume: '', prenume: '', unitate: '', 
+    functie: '', corp: '', domeniu: '', avizJudiciar: '', rolId: ''
+  }, ...prev]); 
+};
+
+const stergeCercetat = (_id) => {
+  if (politistiCercetati.length > 1) {
+    setPolitistiCercetati(prev => prev.filter(p => p._id !== _id));
+  } else {
+    alert('Trebuie să existe cel puțin un polițist cercetat!');
+  }
+};
 
   // Funcții pentru gestionarea polițiștilor desemnați
-  const handleDesemnatChange = (id, field, value) => {
-    setPolitistiDesemnati(prev => 
-      prev.map(politist => 
-        politist.id === id ? { ...politist, [field]: value } : politist
-      )
-    );
-  };
-
-  const adaugaDesemnat = () => {
-  setPolitistiDesemnati(prev => [{
-    id: Date.now(),
-    politistId: '',
-    cnp: '',
-    grad: '',
-    nume: '',
-    prenume: '',
-    unitate: '',
-    functie: '',
-    corp: '',
-    domeniu: '',
-    rolId: ''
-  }, ...prev]);  // Adaugă la început cu spread operator
+  const handleDesemnatChange = (_id, field, value) => {
+  setPolitistiDesemnati(prev => 
+    prev.map(p => p._id === _id ? { ...p, [field]: value } : p)
+  );
 };
 
-  const stergeDesemnat = (id) => {
-    if (politistiDesemnati.length > 1) {
-      setPolitistiDesemnati(prev => prev.filter(politist => politist.id !== id));
-    } else {
-      alert('Trebuie să existe cel puțin un polițist desemnat!');
-    }
-  };
+const adaugaDesemnat = () => {
+  setPolitistiDesemnati(prev => [{
+    _id: Date.now(), // Generăm ID unic pe moment
+    cnp: '', grad: '', nume: '', prenume: '', unitate: '', 
+    functie: '', corp: '', domeniu: '', avizJudiciar: '', rolId: ''
+  }, ...prev]);
+};
 
-  const cautaInDEPABD = (tip, id) => {
-    const politisti = tip === 'cercetat' ? politistiCercetati : politistiDesemnati;
-    const politist = politisti.find(p => p.id === id);
+const stergeDesemnat = (_id) => {
+  if (politistiDesemnati.length > 1) {
+    setPolitistiDesemnati(prev => prev.filter(p => p._id !== _id));
+  } else {
+    alert('Trebuie să existe cel puțin un polițist desemnat!');
+  }
+};
+
+  const cautaInDEPABD = async (tip, _id) => {
+  const lista = tip === 'cercetat' ? politistiCercetati : politistiDesemnati;
+  const politist = lista.find(p => p._id === _id);
+  
+  if (!politist?.cnp) {
+    alert('Introduceți CNP-ul pentru căutare');
+    return;
+  }
+
+  try {
+    const response = await apiClient.get(`${API_BASE_URL}api/PolitistiCautare/${politist.cnp}`);
     
-    if (!politist?.cnp) {
-      alert('Introduceți CNP-ul pentru căutare');
+    if (!response.data) { // Atenție: verifică response.data, nu doar response
+      alert('Nu s-au găsit date pentru acest CNP');
       return;
     }
 
-    // Simulare căutare în DEPABD
-    alert(`Căutare polițist cu CNP: ${politist.cnp} în baza de date DEPABD...`);
-    
-    // Mock data - în producție aici vei face call API
-    const mockData = {
-      politistId: 123,
-      grad: 'Agent',
-      nume: 'Popescu',
-      prenume: 'Ion',
-      unitate: 'București Sector 1',
-      functie: 'Agent de poliție',
-      corp: 'Agenți',
-      domeniu: 'Ordine publică'
-    };
+    const data = response.data; // Presupunând că API-ul returnează direct obiectul cu nume, prenume etc.
 
+    // Actualizăm folosind _id
     if (tip === 'cercetat') {
-      setPolitistiCercetati(prev => 
-        prev.map(p => p.id === id ? { ...p, ...mockData } : p)
-      );
+      setPolitistiCercetati(prev => prev.map(p => p._id === _id ? { ...p, ...data } : p));
     } else {
-      setPolitistiDesemnati(prev => 
-        prev.map(p => p.id === id ? { ...p, ...mockData } : p)
-      );
+      setPolitistiDesemnati(prev => prev.map(p => p._id === _id ? { ...p, ...data } : p));
     }
-  };
+  } catch (error) {
+    console.error(error);
+    alert('Eroare la interogarea bazei de date DEPABD');
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -294,34 +269,37 @@ const AdaugaCercetareModal = ({ onClose }) => {
     };
     
     // Construiește lista de polițiști pentru API
-    const politistiPentruAPI = [
-      // Polițiști cercetați
-      ...politistiCercetatiValizi.map(p => ({
-        PolitistId: p.politistId ? parseInt(p.politistId) : null,
-        Nume: p.nume,
-        Prenume: p.prenume,
-        Functie: p.functie || null,
-        Grad: p.grad,
-        Corp: p.corp || null,
-        Domeniu: p.domeniu || null,
-        Unitate: p.unitate || null,
-        NRolCercetareId: p.rolId ? parseInt(p.rolId) : 1
-      })),
+   const politistiPentruAPI = [
+  // Polițiști cercetați
+  ...politistiCercetatiValizi.map(p => ({
+    // NU mai trimitem PolitistId sau _id
+    Nume: p.nume,
+    Prenume: p.prenume,
+    Functie: p.functie || '',
+    Grad: p.grad,
+    Corp: p.corp || '',
+    Domeniu: p.domeniu || '',
+    Unitate: p.unitate || '',
+    AvizJudiciar: p.avizJudiciar || '',
+    cnp: p.cnp || '',// Adăugat conform cerinței
+    NRolCercetareId: p.rolId ? parseInt(p.rolId) : 1
+  })),
       // Polițiști desemnați (doar cei completați)
       ...politistiDesemnati
-        .filter(p => p.nume && p.prenume)
-        .map(p => ({
-          PolitistId: p.politistId ? parseInt(p.politistId) : null,
-          Nume: p.nume,
-          Prenume: p.prenume,
-          Functie: p.functie || null,
-          Grad: p.grad || null,
-          Corp: p.corp || null,
-          Domeniu: p.domeniu || null,
-          Unitate: p.unitate || null,
-          NRolCercetareId: p.rolId ? parseInt(p.rolId) : 2
-        }))
-    ];
+    .filter(p => p.nume && p.prenume)
+    .map(p => ({
+      Nume: p.nume,
+      Prenume: p.prenume,
+      Functie: p.functie || '',
+      Grad: p.grad || '',
+      Corp: p.corp || '',
+      Domeniu: p.domeniu || '',
+      Unitate: p.unitate || '',
+      AvizJudiciar: p.avizJudiciar || '', 
+      cnp: p.cnp || '',// Adăugat conform cerinței
+      NRolCercetareId: p.rolId ? parseInt(p.rolId) : 2
+    }))
+];
 
     const cercetareData = {
       Numar: formData.numarCercetare,
@@ -379,7 +357,6 @@ const AdaugaCercetareModal = ({ onClose }) => {
         `${API_BASE_URL}api/CercetariDisciplinareIntegration/Adauga-Cercetare`,
         cercetareData
       );
-
       alert('Cercetare adăugată cu succes!');
       onClose();
 
@@ -588,7 +565,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
               </div>
             </div>
 
-            {/* SECTION 3 – POLIȚIȘTI CERCETAȚI */}
+           {/* SECTION 3 – POLIȚIȘTI CERCETAȚI */}
             <div className="form-section">
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
                 <h3 className="section-title" style={{ margin: 0 }}>Polițiști cercetați</h3>
@@ -603,7 +580,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
               </div>
 
               {politistiCercetati.map((politist, index) => (
-                <div key={politist.id} style={{ 
+                <div key={politist._id} style={{  // <--- FOLOSIM _id AICI
                   border: '1px solid #ddd', 
                   padding: '20px', 
                   marginBottom: '20px', 
@@ -616,7 +593,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={() => stergeCercetat(politist.id)}
+                        onClick={() => stergeCercetat(politist._id)} // <--- FOLOSIM _id AICI
                         style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white' }}
                       >
                         🗑️ Șterge
@@ -632,15 +609,15 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         className="input"
                         maxLength="13"
                         value={politist.cnp}
-                        onChange={(e) => handleCercetatChange(politist.id, 'cnp', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'cnp', e.target.value)} // <--- FOLOSIM _id AICI
                       />
                     </div>
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={() => cautaInDEPABD('cercetat', politist.id)}
+                      onClick={() => cautaInDEPABD('cercetat', politist._id)} // <--- FOLOSIM _id AICI
                     >
-                      🔍 Caută în DEPABD
+                      🔍 Caută
                     </button>
                   </div>
 
@@ -651,7 +628,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.grad}
-                        onChange={(e) => handleCercetatChange(politist.id, 'grad', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'grad', e.target.value)}
                         required
                       />
                     </div>
@@ -662,7 +639,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.nume}
-                        onChange={(e) => handleCercetatChange(politist.id, 'nume', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'nume', e.target.value)}
                         required
                       />
                     </div>
@@ -673,7 +650,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.prenume}
-                        onChange={(e) => handleCercetatChange(politist.id, 'prenume', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'prenume', e.target.value)}
                         required
                       />
                     </div>
@@ -684,7 +661,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.unitate}
-                        onChange={(e) => handleCercetatChange(politist.id, 'unitate', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'unitate', e.target.value)}
                         required
                       />
                     </div>
@@ -695,7 +672,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.functie}
-                        onChange={(e) => handleCercetatChange(politist.id, 'functie', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'functie', e.target.value)}
                         required
                       />
                     </div>
@@ -706,7 +683,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.corp}
-                        onChange={(e) => handleCercetatChange(politist.id, 'corp', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'corp', e.target.value)}
                         required
                       />
                     </div>
@@ -717,8 +694,19 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.domeniu}
-                        onChange={(e) => handleCercetatChange(politist.id, 'domeniu', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'domeniu', e.target.value)}
                         required
+                      />
+                    </div>
+
+                    {/* AM ADĂUGAT CÂMPUL AVIZ JUDICIAR */}
+                    <div className="form-group">
+                      <label>Aviz Judiciar</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={politist.avizJudiciar}
+                        onChange={(e) => handleCercetatChange(politist._id, 'avizJudiciar', e.target.value)}
                       />
                     </div>
 
@@ -727,7 +715,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                       <select
                         className="select"
                         value={politist.rolId}
-                        onChange={(e) => handleCercetatChange(politist.id, 'rolId', e.target.value)}
+                        onChange={(e) => handleCercetatChange(politist._id, 'rolId', e.target.value)}
                         required
                       >
                         <option value="">Selectează</option>
@@ -758,7 +746,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
               </div>
 
               {politistiDesemnati.map((politist, index) => (
-                <div key={politist.id} style={{ 
+                <div key={politist._id} style={{ // <--- FOLOSIM _id AICI
                   border: '1px solid #ddd', 
                   padding: '20px', 
                   marginBottom: '20px', 
@@ -771,7 +759,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                       <button
                         type="button"
                         className="btn btn-secondary"
-                        onClick={() => stergeDesemnat(politist.id)}
+                        onClick={() => stergeDesemnat(politist._id)} // <--- FOLOSIM _id AICI
                         style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white' }}
                       >
                         🗑️ Șterge
@@ -787,15 +775,15 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         className="input"
                         maxLength="13"
                         value={politist.cnp}
-                        onChange={(e) => handleDesemnatChange(politist.id, 'cnp', e.target.value)}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'cnp', e.target.value)} // <--- FOLOSIM _id AICI
                       />
                     </div>
                     <button
                       type="button"
                       className="btn btn-secondary"
-                      onClick={() => cautaInDEPABD('desemnat', politist.id)}                      
+                      onClick={() => cautaInDEPABD('desemnat', politist._id)} // <--- FOLOSIM _id AICI                     
                     >
-                      🔍 Caută în DEPABD
+                      🔍 Caută
                     </button>
                   </div>
 
@@ -806,7 +794,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.grad}
-                        onChange={(e) => handleDesemnatChange(politist.id, 'grad', e.target.value)}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'grad', e.target.value)}
                         required
                       />
                     </div>
@@ -817,7 +805,7 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.nume}
-                        onChange={(e) => handleDesemnatChange(politist.id, 'nume', e.target.value)}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'nume', e.target.value)}
                         required
                       />
                     </div>
@@ -828,71 +816,86 @@ const AdaugaCercetareModal = ({ onClose }) => {
                         type="text"
                         className="input"
                         value={politist.prenume}
-                        onChange={(e) => handleDesemnatChange(politist.id, 'prenume', e.target.value)}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'prenume', e.target.value)}
                         required
                       />
-                    </div><div className="form-group">
+                    </div>
+                    
+                    <div className="form-group">
                       <label>Unitate *</label>
                       <input
                         type="text"
                         className="input"
                         value={politist.unitate}
-                        onChange={(e) => handleDesemnatChange(politist.id, 'unitate', e.target.value)}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'unitate', e.target.value)}
                         required
                       />
-                    </div><div className="form-group">
-                  <label>Funcție *</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={politist.functie}
-                    onChange={(e) => handleDesemnatChange(politist.id, 'functie', e.target.value)}
-                    required
-                  />
-                </div>
+                    </div>
+                    
+                    <div className="form-group">
+                      <label>Funcție *</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={politist.functie}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'functie', e.target.value)}
+                        required
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>Corp profesional *</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={politist.corp}
-                    onChange={(e) => handleDesemnatChange(politist.id, 'corp', e.target.value)}
-                    required
-                  />
-                </div>
+                    <div className="form-group">
+                      <label>Corp profesional *</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={politist.corp}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'corp', e.target.value)}
+                        required
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>Domeniu *</label>
-                  <input
-                    type="text"
-                    className="input"
-                    value={politist.domeniu}
-                    onChange={(e) => handleDesemnatChange(politist.id, 'domeniu', e.target.value)}
-                    required
-                  />
-                </div>
+                    <div className="form-group">
+                      <label>Domeniu *</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={politist.domeniu}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'domeniu', e.target.value)}
+                        required
+                      />
+                    </div>
 
-                <div className="form-group">
-                  <label>Rol *</label>
-                  <select
-                    className="select"
-                    value={politist.rolId}
-                    onChange={(e) => handleDesemnatChange(politist.id, 'rolId', e.target.value)}
-                    required
-                  >
-                    <option value="">Selectează</option>
-                    {nomenclatoare.rolCercertare.map((rol) => (
-                      <option key={rol.id} value={rol.id}>
-                        {rol.nume || rol.denumire || rol.descriere}
-                      </option>
-                    ))}
-                  </select>
+                    {/* AM ADĂUGAT CÂMPUL AVIZ JUDICIAR */}
+                    <div className="form-group">
+                      <label>Aviz Judiciar</label>
+                      <input
+                        type="text"
+                        className="input"
+                        value={politist.avizJudiciar}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'avizJudiciar', e.target.value)}
+                      />
+                    </div>
+
+                    <div className="form-group">
+                      <label>Rol *</label>
+                      <select
+                        className="select"
+                        value={politist.rolId}
+                        onChange={(e) => handleDesemnatChange(politist._id, 'rolId', e.target.value)}
+                        required
+                      >
+                        <option value="">Selectează</option>
+                        {nomenclatoare.rolCercertare.map((rol) => (
+                          <option key={rol.id} value={rol.id}>
+                            {rol.nume || rol.denumire || rol.descriere}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
                 </div>
-              </div>
+              ))}
             </div>
-          ))}
-        </div>
 
         {/* SECTION 5 – RAPORT & SOLUȚII */}
         <div className="form-section">
