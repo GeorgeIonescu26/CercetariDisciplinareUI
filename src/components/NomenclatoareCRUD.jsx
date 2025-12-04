@@ -33,7 +33,7 @@ const NomenclatorCRUD = ({ config }) => {
     const initialData = {};
     config.fields.forEach(field => {
       if (!field.hidden && !field.readonly) {
-        initialData[field.name] = field.type === 'number' ? 0 : '';
+        initialData[field.name] = field.type === 'number' ? 1 : '';
       }
     });
     setFormData(initialData);
