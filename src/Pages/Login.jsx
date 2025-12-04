@@ -30,7 +30,7 @@ export default function LoginPage() {
             localStorage.setItem("token", data.token);
             localStorage.setItem("username", username);
             localStorage.setItem("isAdmin", data.isAdmin);
-            navigate("/dashboard");
+            navigate("/cercetariDisciplinare");
         } catch {
             setError("Autentificare eșuată. Verificați datele introduse.");
         }

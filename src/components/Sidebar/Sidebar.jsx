@@ -7,8 +7,7 @@ const Sidebar = () => {
   const location = useLocation();
   
   const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: '📊', path: '/dashboard' },
-    { id: 'politisti', label: 'Polițiști', icon: '👮', path: '/politisti' },
+    { id: 'cercetareDisciplinara', label: 'Cercetari Disciplinare', icon: '📊', path: '/cercetariDisciplinare' },
     { id: 'nomenclatoare', label: 'Nomenclatoare', icon: '📋', path: '/nomenclatoare' },
     { id: 'rapoarte', label: 'Rapoarte', icon: '📈', path: '/rapoarte' },
     { id: 'setari', label: 'Setări', icon: '⚙️', path: '/setari' }

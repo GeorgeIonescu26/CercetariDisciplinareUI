@@ -1,17 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import './Dashboard.css';
-import AdaugaCercetareModal from './AdaugaCercetareModal';
-import { API_BASE_URL, apiClient } from "../apiClient";
 
-const Dashboard = () => {
+import React, { useState, useEffect } from 'react';
+import './CercetareDisciplinara.css';
+import { API_BASE_URL, apiClient } from "../apiClient";
+import { useNavigate } from 'react-router-dom';
+
+const CercetareDisciplinara = () => {
   // ============ STATE MANAGEMENT ============
   const [cercetari, setCercetari] = useState([]);
   const [selectedCercetareId, setSelectedCercetareId] = useState(null);
   const [activeTab, setActiveTab] = useState('generale');
-  const [showModal, setShowModal] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
+   const navigate = useNavigate();
+ //
   // State pentru filtre
   const [filters, setFilters] = useState({
     searchText: '',
@@ -19,6 +20,7 @@ const Dashboard = () => {
     dataStart: '',
     dataEnd: ''
   });
+
 
   // ============ DATA FETCHING ============
   useEffect(() => {
@@ -67,10 +69,10 @@ const Dashboard = () => {
     if (!cercetare || !cercetare.politisti || cercetare.politisti.length === 0) {
       return null;
     }
-    
+  
     // Caută polițistul cu rolul 1 (cercetat)
-    const politistCercetat = cercetare.politisti.find(p => p.nRolCercetareId === 1);
-    
+    const politistCercetat = cercetare.politisti.find(p => p.nRolCercetareResponse.denumire === "cercetat");
+
     if (!politistCercetat || !politistCercetat.politist) {
       return null;
     }
@@ -83,18 +85,26 @@ const Dashboard = () => {
     if (!cercetare || !cercetare.politisti) {
       return [];
     }
-    return cercetare.politisti.filter(p => p.nRolCercetareId !== 1);
+    return cercetare.politisti.filter(p => p.nRolCercetareResponse.denumire === "membru comisie");
+  };
+
+  const getPolitistDesemnat = (cercetare) => { debugger;
+    if (!cercetare || !cercetare.politisti || cercetare.politisti.length === 0) {
+      return null;
+    }
+    
+    const politistDesemnat = cercetare.politisti.find(p => p.nRolCercetareResponse.denumire === "desemnat");
+    if(!politistDesemnat || !politistCercetat.politist) return null;
+
+    return politistDesemnat.politist;
   };
 
   // Calculare status cercetare
   const getCercetareStatus = (cercetare) => {
-    if (cercetare.solutieSefId !== null && cercetare.solutieSefId !== undefined) {
+    if (cercetare.solutieSef) {
       return 'finalizata';
     }
-    if (cercetare.solutieRaportId !== null && cercetare.solutieRaportId !== undefined) {
-      return 'in-lucru';
-    }
-    if (cercetare.rapoarteCercetare) {
+    if (cercetare.solutieRaport || cercetare.rapoarteCercetare) {
       return 'in-lucru';
     }
     if (cercetare.dispozitie) {
@@ -175,16 +185,10 @@ const Dashboard = () => {
     setActiveTab('generale');
   };
 
-  const handleCloseModal = (shouldRefresh) => {
-    setShowModal(false);
-    if (shouldRefresh) {
-      loadCercetari();
-    }
-  };
-
   // ============ GET SELECTED DATA ============
   const cercetareSelectata = cercetari.find(c => c.id === selectedCercetareId);
   const politistCercetat = cercetareSelectata ? getPolitistCercetat(cercetareSelectata) : null;
+  const politistDesemnat = cercetareSelectata ? getPolitistDesemnat(cercetareSelectata) : null;
   const membriComisie = cercetareSelectata ? getMembriComisie(cercetareSelectata) : [];
 
   // ============ RENDER LOADING/ERROR STATES ============
@@ -219,7 +223,12 @@ const Dashboard = () => {
       {/* Header */}
       <div className="section-header">
         <h1>Cercetări disciplinare</h1>
-        <button className="btn btn-primary" onClick={() => setShowModal(true)}>
+        
+        {/* Butonul acum face navigare, nu deschide modal */}
+        <button 
+          className="btn btn-primary" 
+          onClick={() => navigate('/adaugareModal')}
+        >
           <span className="icon">+</span>
           Adaugă cercetare nouă
         </button>
@@ -236,17 +245,20 @@ const Dashboard = () => {
             onChange={(e) => handleFilterChange('searchText', e.target.value)}
           />
           
-          <select 
-            className="select"
-            value={filters.status}
-            onChange={(e) => handleFilterChange('status', e.target.value)}
-          >
-            <option value="">Toate statusurile</option>
-            <option value="noua">Nouă</option>
-            <option value="deschisa">Deschisă</option>
-            <option value="in-lucru">În lucru</option>
-            <option value="finalizata">Finalizată</option>
-          </select>
+          <div className="custom-select-wrapper"> 
+      <select 
+        className="custom-select" 
+        value={filters.status}
+        onChange={(e) => handleFilterChange('status', e.target.value)}
+      >
+        <option value="">Toate statusurile</option>
+        <option value="noua">Nouă</option>
+        <option value="deschisa">Deschisă</option>
+        <option value="in-lucru">În lucru</option>
+        <option value="finalizata">Finalizată</option>
+      </select>
+      <span className="select-arrow"></span>
+    </div>
 
           <input 
             type="date" 
@@ -325,13 +337,12 @@ const Dashboard = () => {
                 <thead>
                   <tr>
                     <th>Număr</th>
-                    <th>Data</th>
-                    <th>Polițist cercetat</th>
+                    <th>Data</th>                     
                     <th>Grad</th>
+                    <th>Polițist cercetat</th>
                     <th>Funcție</th>
                     <th>Unitate</th>
                     <th>Status</th>
-                    <th>Acțiuni</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -348,43 +359,21 @@ const Dashboard = () => {
                         onClick={() => handleSelectCercetare(cercetare.id)}
                         style={{ cursor: 'pointer' }}
                       >
-                        <td><strong>#{cercetare.numar}</strong></td>
+                        <td><strong>{cercetare.numar}</strong></td>
                         <td>{formatDate(cercetare.data)}</td>
+                        <td>{politistCercetat?.grad || '-'}</td>
                         <td>
-                          {politist 
-                            ? `${politist.nume} ${politist.prenume}` 
+                          {politistCercetat
+                            ? `${politistCercetat.nume} ${politistCercetat.prenume}` 
                             : <em>Nu este specificat</em>}
                         </td>
-                        <td>{politist?.grad || '-'}</td>
-                        <td>{politist?.functie || '-'}</td>
-                        <td>{politist?.unitate || '-'}</td>
+                        <td>{politistCercetat?.functie || '-'}</td>
+                        <td>{politistCercetat?.unitate || '-'}</td>
                         <td>
                           <span className={`status ${statusBadge.class}`}>
                             {statusBadge.label}
                           </span>
-                        </td>
-                        <td>
-                          <button 
-                            className="btn-icon" 
-                            title="Vezi detalii"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleSelectCercetare(cercetare.id);
-                            }}
-                          >
-                            👁️
-                          </button>
-                          <button 
-                            className="btn-icon" 
-                            title="Editează"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              // TODO: Implementare editare
-                            }}
-                          >
-                            ✏️
-                          </button>
-                        </td>
+                        </td>                
                       </tr>
                     );
                   })}
@@ -413,10 +402,24 @@ const Dashboard = () => {
                 Date generale
               </button>
               <button 
-                className={`tab ${activeTab === 'politisti' ? 'active' : ''}`}
-                onClick={() => setActiveTab('politisti')}
+                className={`tab ${activeTab === 'politistiCercetat' ? 'active' : ''}`}
+                onClick={() => setActiveTab('politistCercetat')}
               >
-                Polițiști
+                Polițist Cercetat
+              </button>
+
+              <button 
+                className={`tab ${activeTab === 'politistDesemnat' ? 'active' : ''}`}
+                onClick={() => setActiveTab('politistDesemnat')}
+              >
+                Polițist Desemnat
+              </button>
+
+              <button 
+                className={`tab ${activeTab === 'membriiComisiei' ? 'active' : ''}`}
+                onClick={() => setActiveTab('membriiComisiei')}
+              >
+                Membrii Comisiei
               </button>
               <button 
                 className={`tab ${activeTab === 'fapta' ? 'active' : ''}`}
@@ -486,8 +489,8 @@ const Dashboard = () => {
                 </div>
               )}
 
-              {/* TAB: Polițiști */}
-              {activeTab === 'politisti' && (
+              {/* TAB: Polițiști Cercetati */}
+              {activeTab === 'politistCercetat' && (
                 <div className="pane active">
                   
                   {/* Polițist cercetat */}
@@ -524,6 +527,52 @@ const Dashboard = () => {
                       </div>
                     </div>
                   )}
+                </div>
+              )}
+
+              {/* TAB: Polițiști Desemnat */}
+              {activeTab === 'politistDesemnat' && (
+                <div className="pane active">
+                  {/* Polițist desemnat */}
+                  {politistDesemnat && (
+                    <div className="subsection">
+                      <h4 className="subsection-title">👤 Polițist desemnat</h4>
+                      <div className="kv">
+                        <div className="kv-label">Grad</div>
+                        <div className="kv-value">{politistDesemnat.grad}</div>
+
+                        <div className="kv-label">Nume și prenume</div>
+                        <div className="kv-value">
+                          <strong>{politistDesemnat.nume} {politistDesemnat.prenume}</strong>
+                        </div>
+
+                        <div className="kv-label">Funcție</div>
+                        <div className="kv-value">{politistDesemnat.functie}</div>
+
+                        <div className="kv-label">Corp</div>
+                        <div className="kv-value">{politistDesemnat.corp}</div>
+
+                        <div className="kv-label">Domeniu</div>
+                        <div className="kv-value">{politistDesemnat.domeniu}</div>
+
+                        <div className="kv-label">Unitate</div>
+                        <div className="kv-value">{politistDesemnat.unitate}</div>
+
+                        {politistDesemnat.avizJudiciar && (
+                          <>
+                            <div className="kv-label">Aviz judiciar</div>
+                            <div className="kv-value">{politistDesemnat.avizJudiciar}</div>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  )}
+                  </div>
+                  )}
+
+                  {/* TAB: Membrii comisiei */}
+              {activeTab === 'membriiComisiei' && (
+                <div className="pane active">
 
                   {/* Membri comisie */}
                   {membriComisie.length > 0 && (
@@ -550,8 +599,8 @@ const Dashboard = () => {
                       <p>Nu sunt polițiști asociați acestei cercetări.</p>
                     </div>
                   )}
-                </div>
-              )}
+                  </div>
+                  )}
 
               {/* TAB: Faptă */}
               {activeTab === 'fapta' && (
@@ -563,10 +612,10 @@ const Dashboard = () => {
                         {formatDate(cercetareSelectata.fapta.dataInceput)} → {formatDate(cercetareSelectata.fapta.dataSfarsit)}
                       </div>
 
-                      <div className="kv-label">Abatere disciplinară (ID)</div>
+                      <div className="kv-label">Abatere disciplinară</div>
                       <div className="kv-value">
                         <span className="badge badge-info">
-                          ID: {cercetareSelectata.fapta.nAbatereDisciplinaraId}
+                          {cercetareSelectata.fapta.nAbatereDisciplinara?.denumire || `ID: ${cercetareSelectata.fapta.nAbatereDisciplinara?.id}`}
                         </span>
                       </div>
 
@@ -666,10 +715,13 @@ const Dashboard = () => {
                       <div className="solutie-content">
                         <div className="solutie-title">Soluție raport cercetare</div>
                         <div className="solutie-value">
-                          {cercetareSelectata.solutieRaportId 
-                            ? <span className="badge badge-info">ID: {cercetareSelectata.solutieRaportId}</span>
-                            : <span className="badge badge-secondary">Necompletată</span>
-                          }
+                          {cercetareSelectata.solutieRaport ? (
+                            <span className="badge badge-info">
+                              {cercetareSelectata.solutieRaport.denumire}
+                            </span>
+                          ) : (
+                            <span className="badge badge-secondary">Necompletată</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -680,10 +732,13 @@ const Dashboard = () => {
                       <div className="solutie-content">
                         <div className="solutie-title">Soluție propusă</div>
                         <div className="solutie-value">
-                          {cercetareSelectata.solutiePropusaId 
-                            ? <span className="badge badge-info">ID: {cercetareSelectata.solutiePropusaId}</span>
-                            : <span className="badge badge-secondary">Necompletată</span>
-                          }
+                          {cercetareSelectata.solutiePropusa ? (
+                            <span className="badge badge-info">
+                              {cercetareSelectata.solutiePropusa.denumire}
+                            </span>
+                          ) : (
+                            <span className="badge badge-secondary">Necompletată</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -694,10 +749,13 @@ const Dashboard = () => {
                       <div className="solutie-content">
                         <div className="solutie-title">Soluție consultare</div>
                         <div className="solutie-value">
-                          {cercetareSelectata.solutieConsultareId 
-                            ? <span className="badge badge-info">ID: {cercetareSelectata.solutieConsultareId}</span>
-                            : <span className="badge badge-secondary">Necompletată</span>
-                          }
+                          {cercetareSelectata.solutieConsultare ? (
+                            <span className="badge badge-info">
+                              {cercetareSelectata.solutieConsultare.denumire}
+                            </span>
+                          ) : (
+                            <span className="badge badge-secondary">Necompletată</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -708,10 +766,13 @@ const Dashboard = () => {
                       <div className="solutie-content">
                         <div className="solutie-title">Soluție restituire</div>
                         <div className="solutie-value">
-                          {cercetareSelectata.solutieRestituireId 
-                            ? <span className="badge badge-info">ID: {cercetareSelectata.solutieRestituireId}</span>
-                            : <span className="badge badge-secondary">Necompletată</span>
-                          }
+                          {cercetareSelectata.solutieRestituire ? (
+                            <span className="badge badge-info">
+                              {cercetareSelectata.solutieRestituire.denumire}
+                            </span>
+                          ) : (
+                            <span className="badge badge-secondary">Necompletată</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -722,10 +783,13 @@ const Dashboard = () => {
                       <div className="solutie-content">
                         <div className="solutie-title">🎯 Soluție șef (FINALĂ)</div>
                         <div className="solutie-value">
-                          {cercetareSelectata.solutieSefId 
-                            ? <span className="badge badge-success">✓ Aprobată - ID: {cercetareSelectata.solutieSefId}</span>
-                            : <span className="badge badge-warning">⏳ În așteptare</span>
-                          }
+                          {cercetareSelectata.solutieSef ? (
+                            <span className="badge badge-success">
+                              ✓ {cercetareSelectata.solutieSef.denumire}
+                            </span>
+                          ) : (
+                            <span className="badge badge-warning">⏳ În așteptare</span>
+                          )}
                         </div>
                       </div>
                     </div>
@@ -752,21 +816,14 @@ const Dashboard = () => {
           </div>
         ) : (
           <div className="panel empty-selection">
-            <div className="empty-state">
-              <h3>Nicio cercetare selectată</h3>
-              <p>Selectează o cercetare din lista din stânga pentru a vedea detaliile.</p>
-            </div>
-          </div>
-        )}
+            <div className="empty- state">
+<h3>Nicio cercetare selectată</h3>
+<p>Selectează o cercetare din lista din stânga pentru a vedea detaliile.</p>
+</div>
+</div>
+)}
+</div>
 
-      </div>
-
-      {/* Modal adăugare cercetare */}
-      {showModal && (
-        <AdaugaCercetareModal onClose={handleCloseModal} />
-      )}
-    </div>
-  );
+</div>);
 };
-
-export default Dashboard;
+export default CercetareDisciplinara;

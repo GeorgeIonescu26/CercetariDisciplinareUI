@@ -29,10 +29,9 @@
 }
 
 .filters {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  align-items: center;
+  display: flex; /* Activează Flexbox */
+  gap: 15px; /* Adaugă spațiu între elementele copil (input și select) */
+  align-items: center; /* Aliniază vertical elementele la mijloc (dacă au înălțimi diferite) */
 }
 
 .input,

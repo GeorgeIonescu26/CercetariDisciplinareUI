@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './AdaugaCercetareModal.css';
-import axios from 'axios';
 import { API_BASE_URL, apiClient } from "../apiClient";
+import { useNavigate } from 'react-router-dom';
 
 const formatDate = (date) => {
   const d = new Date(date);
@@ -11,7 +11,8 @@ const formatDate = (date) => {
   return `${year}-${month}-${day}`;
 };
 
-const AdaugaCercetareModal = ({ onClose }) => {
+const AdaugaCercetareModal = () => {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     // Date cercetare
     numarCercetare: '',
@@ -36,15 +37,15 @@ const AdaugaCercetareModal = ({ onClose }) => {
     
     // Raport cercetare
     numarRaport: '',
-    dataRaport: formatDate(new Date()),
+    dataRaport: '',
     
     // Hotărâre judecătorească
     numarHotarare: '',
-    dataHotarare: formatDate(new Date()),
+    dataHotarare: '',
     
     // Recompensă
     numarRecompensa: '',
-    dataRecompensa: formatDate(new Date()),
+    dataRecompensa: '',
     
     // Soluții (acum ID-uri pentru nomenclatoare)
     solutieRaportId: '',
@@ -224,6 +225,11 @@ const stergeDesemnat = (_id) => {
   }
 };
 
+const handleBack = () => {
+    navigate('/cercetariDisciplinare');
+
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -358,7 +364,7 @@ const stergeDesemnat = (_id) => {
         cercetareData
       );
       alert('Cercetare adăugată cu succes!');
-      onClose();
+      navigate('/cercetariDisciplinare');
 
     } catch (error) {
       console.error('Eroare completă:', error);
@@ -383,707 +389,380 @@ const stergeDesemnat = (_id) => {
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="modal-container" onClick={(e) => e.stopPropagation()}>
-
-        {/* HEADER */}
-        <div className="modal-header">
-          <h2>Adaugă cercetare disciplinară nouă</h2>
-          <button className="modal-close" onClick={onClose}>✕</button>
+    <div className="page-container">
+      {/* HEADER PAGINĂ */}
+      <div className="page-header">
+        <div className="header-title-group">
+           {/* Buton opțional de ÎNAPOI */}
+           <button className="btn-back" onClick={handleBack}>← Înapoi</button>
+           <h2>Adaugă cercetare disciplinară nouă</h2>
         </div>
+      </div>
 
+      <div className="page-content">
         <form onSubmit={handleSubmit}>
 
-          {/* BODY SCROLLABIL */}
-          <div className="modal-body">
+          {/* SECȚIUNEA 1 – DATE CERCETARE */}
+          <div className="form-section">
+            <h3 className="section-title">Date generale cercetare</h3>
 
-            {/* SECTION 1 – DATE CERCETARE */}
-            <div className="form-section">
-              <h3 className="section-title">Date generale cercetare</h3>
-
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Număr cercetare *</label>
-                  <input
-                    type="text"
-                    name="numarCercetare"
-                    className="input"
-                    value={formData.numarCercetare}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Data cercetare *</label>
-                  <input
-                    type="date"
-                    name="dataCercetare"
-                    className="input"
-                    value={formData.dataCercetare}
-                    onChange={handleInputChange}
-                    required
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Termen prescripție</label>
-                  <input
-                    type="date"
-                    name="termenPrescriptie"
-                    className="input"
-                    value={formData.termenPrescriptie}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Termen decădere</label>
-                  <input
-                    type="date"
-                    name="termenDecadere"
-                    className="input"
-                    value={formData.termenDecadere}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              {/* DISPOZITIE */}
-              <h3 className="section-title">Dispoziție</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Număr dispoziție</label>
-                  <input
-                    type="text"
-                    name="numarDispozitie"
-                    className="input"
-                    value={formData.numarDispozitie}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Data dispoziție</label>
-                  <input
-                    type="date"
-                    name="dataDispozitie"
-                    className="input"
-                    value={formData.dataDispozitie}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-
-              {/* ACT SESIZARE */}
-              <h3 className="section-title">Act sesizare</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Număr act sesizare</label>
-                  <input
-                    type="text"
-                    name="numarActSesizare"
-                    className="input"
-                    value={formData.numarActSesizare}
-                    onChange={handleInputChange}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Data act sesizare</label>
-                  <input
-                    type="date"
-                    name="dataActSesizare"
-                    className="input"
-                    value={formData.dataActSesizare}
-                    onChange={handleInputChange}
-                  />
-                </div>
-              </div>
-            </div>
-
-            {/* SECTION 2 – FAPTA */}
-            <div className="form-section">
-              <h3 className="section-title">Descrierea faptei</h3>
-
+            <div className="form-grid">
               <div className="form-group">
-                <label>Descriere faptă *</label>
-                <textarea
-                  name="descriereFapta"
-                  className="textarea"
-                  rows="5"
-                  value={formData.descriereFapta}
+                <label>Număr cercetare *</label>
+                <input
+                  type="text"
+                  name="numarCercetare"
+                  className="input"
+                  value={formData.numarCercetare}
                   onChange={handleInputChange}
                   required
                 />
               </div>
 
-              {loadingNomenclatoare ? (
-                <p>Se încarcă...</p>
-              ) : (
-                <div className="form-group">
-                  <label>Abatere disciplinară</label>
-                  <select
-                    name="abatereDisciplinaraId"
-                    className="select"
-                    value={formData.abatereDisciplinaraId}
-                    onChange={handleInputChange}
-                  >
-                    <option value="">Selectează</option>
-                    {nomenclatoare.abatereDisciplinara.map((abatere) => (
-                      <option key={abatere.id} value={abatere.id}>
-                        {abatere.nume || abatere.denumire || abatere.descriere}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
+              <div className="form-group">
+                <label>Data cercetare *</label>
+                <input
+                  type="date"
+                  name="dataCercetare"
+                  className="input"
+                  value={formData.dataCercetare}
+                  onChange={handleInputChange}
+                  required
+                />
+              </div>
 
-              <h3 className="section-title">Perioada faptei</h3>
-              <div className="form-grid">
-                <div className="form-group">
-                  <label>Data început</label>
-                  <input
-                    type="date"
-                    name="perioadaStart"
-                    className="input"
-                    value={formData.perioadaStart}
-                    onChange={handleInputChange}
-                  />
-                </div>
+              <div className="form-group">
+                <label>Termen prescripție</label>
+                <input
+                  type="date"
+                  name="termenPrescriptie"
+                  className="input"
+                  value={formData.termenPrescriptie}
+                  onChange={handleInputChange}
+                />
+              </div>
 
-                <div className="form-group">
-                  <label>Data sfârșit</label>
-                  <input
-                    type="date"
-                    name="perioadaSfarsit"
-                    className="input"
-                    value={formData.perioadaSfarsit}
-                    onChange={handleInputChange}
-                  />
-                </div>
+              <div className="form-group">
+                <label>Termen decădere</label>
+                <input
+                  type="date"
+                  name="termenDecadere"
+                  className="input"
+                  value={formData.termenDecadere}
+                  onChange={handleInputChange}
+                />
               </div>
             </div>
 
-           {/* SECTION 3 – POLIȚIȘTI CERCETAȚI */}
-            <div className="form-section">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 className="section-title" style={{ margin: 0 }}>Polițiști cercetați</h3>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={adaugaCercetat}
-                  style={{ padding: '8px 16px' }}
-                >
-                  ➕ Adaugă polițist cercetat
-                </button>
-              </div>
-
-              {politistiCercetati.map((politist, index) => (
-                <div key={politist._id} style={{  // <--- FOLOSIM _id AICI
-                  border: '1px solid #ddd', 
-                  padding: '20px', 
-                  marginBottom: '20px', 
-                  borderRadius: '8px',
-                  backgroundColor: '#f9f9f9'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h4 style={{ margin: 0 }}>Polițist cercetat #{index + 1}</h4>
-                    {politistiCercetati.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => stergeCercetat(politist._id)} // <--- FOLOSIM _id AICI
-                        style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white' }}
-                      >
-                        🗑️ Șterge
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="depabd-search">
-                    <div className="form-group">
-                      <label>CNP</label>
-                      <input
-                        type="text"
-                        className="input"
-                        maxLength="13"
-                        value={politist.cnp}
-                        onChange={(e) => handleCercetatChange(politist._id, 'cnp', e.target.value)} // <--- FOLOSIM _id AICI
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => cautaInDEPABD('cercetat', politist._id)} // <--- FOLOSIM _id AICI
-                    >
-                      🔍 Caută
-                    </button>
-                  </div>
-
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label>Grad *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.grad}
-                        onChange={(e) => handleCercetatChange(politist._id, 'grad', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Nume *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.nume}
-                        onChange={(e) => handleCercetatChange(politist._id, 'nume', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Prenume *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.prenume}
-                        onChange={(e) => handleCercetatChange(politist._id, 'prenume', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Unitate *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.unitate}
-                        onChange={(e) => handleCercetatChange(politist._id, 'unitate', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Funcție *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.functie}
-                        onChange={(e) => handleCercetatChange(politist._id, 'functie', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Corp profesional *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.corp}
-                        onChange={(e) => handleCercetatChange(politist._id, 'corp', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Domeniu *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.domeniu}
-                        onChange={(e) => handleCercetatChange(politist._id, 'domeniu', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    {/* AM ADĂUGAT CÂMPUL AVIZ JUDICIAR */}
-                    <div className="form-group">
-                      <label>Aviz Judiciar</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.avizJudiciar}
-                        onChange={(e) => handleCercetatChange(politist._id, 'avizJudiciar', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Rol *</label>
-                      <select
-                        className="select"
-                        value={politist.rolId}
-                        onChange={(e) => handleCercetatChange(politist._id, 'rolId', e.target.value)}
-                        required
-                      >
-                        <option value="">Selectează</option>
-                        {nomenclatoare.rolCercertare.map((rol) => (
-                          <option key={rol.id} value={rol.id}>
-                            {rol.nume || rol.denumire || rol.descriere}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-            {/* SECTION 4 – POLIȚIȘTI DESEMNAȚI */}
-            <div className="form-section">
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
-                <h3 className="section-title" style={{ margin: 0 }}>Polițiști desemnați</h3>
-                <button
-                  type="button"
-                  className="btn btn-primary"
-                  onClick={adaugaDesemnat}
-                  style={{ padding: '8px 16px' }}
-                >
-                  ➕ Adaugă polițist desemnat
-                </button>
-              </div>
-
-              {politistiDesemnati.map((politist, index) => (
-                <div key={politist._id} style={{ // <--- FOLOSIM _id AICI
-                  border: '1px solid #ddd', 
-                  padding: '20px', 
-                  marginBottom: '20px', 
-                  borderRadius: '8px',
-                  backgroundColor: '#f9f9f9'
-                }}>
-                  <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
-                    <h4 style={{ margin: 0 }}>Polițist desemnat #{index + 1}</h4>
-                    {politistiDesemnati.length > 1 && (
-                      <button
-                        type="button"
-                        className="btn btn-secondary"
-                        onClick={() => stergeDesemnat(politist._id)} // <--- FOLOSIM _id AICI
-                        style={{ padding: '6px 12px', backgroundColor: '#dc3545', color: 'white' }}
-                      >
-                        🗑️ Șterge
-                      </button>
-                    )}
-                  </div>
-
-                  <div className="depabd-search">
-                    <div className="form-group">
-                      <label>CNP</label>
-                      <input
-                        type="text"
-                        className="input"
-                        maxLength="13"
-                        value={politist.cnp}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'cnp', e.target.value)} // <--- FOLOSIM _id AICI
-                      />
-                    </div>
-                    <button
-                      type="button"
-                      className="btn btn-secondary"
-                      onClick={() => cautaInDEPABD('desemnat', politist._id)} // <--- FOLOSIM _id AICI                     
-                    >
-                      🔍 Caută
-                    </button>
-                  </div>
-
-                  <div className="form-grid">
-                    <div className="form-group">
-                      <label>Grad *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.grad}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'grad', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Nume *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.nume}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'nume', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Prenume *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.prenume}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'prenume', e.target.value)}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <label>Unitate *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.unitate}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'unitate', e.target.value)}
-                        required
-                      />
-                    </div>
-                    
-                    <div className="form-group">
-                      <label>Funcție *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.functie}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'functie', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Corp profesional *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.corp}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'corp', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Domeniu *</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.domeniu}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'domeniu', e.target.value)}
-                        required
-                      />
-                    </div>
-
-                    {/* AM ADĂUGAT CÂMPUL AVIZ JUDICIAR */}
-                    <div className="form-group">
-                      <label>Aviz Judiciar</label>
-                      <input
-                        type="text"
-                        className="input"
-                        value={politist.avizJudiciar}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'avizJudiciar', e.target.value)}
-                      />
-                    </div>
-
-                    <div className="form-group">
-                      <label>Rol *</label>
-                      <select
-                        className="select"
-                        value={politist.rolId}
-                        onChange={(e) => handleDesemnatChange(politist._id, 'rolId', e.target.value)}
-                        required
-                      >
-                        <option value="">Selectează</option>
-                        {nomenclatoare.rolCercertare.map((rol) => (
-                          <option key={rol.id} value={rol.id}>
-                            {rol.nume || rol.denumire || rol.descriere}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-        {/* SECTION 5 – RAPORT & SOLUȚII */}
-        <div className="form-section">
-          <h3 className="section-title">Raport cercetare</h3>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Număr raport</label>
-              <input
-                type="text"
-                name="numarRaport"
-                className="input"
-                value={formData.numarRaport}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Data raport</label>
-              <input
-                type="date"
-                name="dataRaport"
-                className="input"
-                value={formData.dataRaport}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-
-          <h3 className="section-title">Hotărâre judecătorească</h3>
-
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Număr hotărâre</label>
-              <input
-                type="text"
-                name="numarHotarare"
-                className="input"
-                value={formData.numarHotarare}
-                onChange={handleInputChange}
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Data hotărâre</label>
-              <input
-                type="date"
-                name="dataHotarare"
-                className="input"
-                value={formData.dataHotarare}
-                onChange={handleInputChange}
-              />
-            </div>
-          </div>
-
-          <h3 className="section-title">Recompensă</h3>
-
-          <div className="form-group">
-            <label>Număr recompensă</label>
-            <input
-              type="text"
-              name="numarRecompensa"
-              className="input"
-              value={formData.numarRecompensa}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Data recompensă</label>
-            <input
-              type="date"
-              name="dataRecompensa"
-              className="input"
-              value={formData.dataRecompensa}
-              onChange={handleInputChange}
-            />
-          </div>
-
-          <h3 className="section-title">Soluții</h3>
-
-          {loadingNomenclatoare ? (
-            <p>Se încarcă listele de soluții...</p>
-          ) : (
+            {/* DISPOZITIE */}
+            <h3 className="section-title">Dispoziție</h3>
             <div className="form-grid">
               <div className="form-group">
-                <label>Soluție raport</label>
-                <select
-                  name="solutieRaportId"
-                  className="select"
-                  value={formData.solutieRaportId}
+                <label>Număr dispoziție</label>
+                <input
+                  type="text"
+                  name="numarDispozitie"
+                  className="input"
+                  value={formData.numarDispozitie}
                   onChange={handleInputChange}
-                >
-                  <option value="">Selectează</option>
-                  {nomenclatoare.solutiiRaport.map((solutie) => (
-                    <option key={solutie.id} value={solutie.id}>
-                      {solutie.nume || solutie.denumire || solutie.descriere}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
 
               <div className="form-group">
-                <label>Soluție propusă</label>
-                <select
-                  name="solutiePropusaId"
-                  className="select"
-                  value={formData.solutiePropusaId}
+                <label>Data dispoziție</label>
+                <input
+                  type="date"
+                  name="dataDispozitie"
+                  className="input"
+                  value={formData.dataDispozitie}
                   onChange={handleInputChange}
-                >
-                  <option value="">Selectează</option>
-                  {nomenclatoare.solutiiPropuse.map((solutie) => (
-                    <option key={solutie.id} value={solutie.id}>
-                      {solutie.nume || solutie.denumire || solutie.descriere}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Soluție șef</label>
-                <select
-                  name="solutieSefId"
-                  className="select"
-                  value={formData.solutieSefId}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Selectează</option>
-                  {nomenclatoare.solutiiSef.map((solutie) => (
-                    <option key={solutie.id} value={solutie.id}>
-                      {solutie.nume || solutie.denumire || solutie.descriere}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Soluție consultare</label>
-                <select
-                  name="solutieConsultareId"
-                  className="select"
-                  value={formData.solutieConsultareId}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Selectează</option>
-                  {nomenclatoare.solutiiConsultare.map((solutie) => (
-                    <option key={solutie.id} value={solutie.id}>
-                      {solutie.nume || solutie.denumire || solutie.descriere}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
-              <div className="form-group">
-                <label>Soluție restituire</label>
-                <select
-                  name="solutieRestituireId"
-                  className="select"
-                  value={formData.solutieRestituireId}
-                  onChange={handleInputChange}
-                >
-                  <option value="">Selectează</option>
-                  {nomenclatoare.solutiiRestituire.map((solutie) => (
-                    <option key={solutie.id} value={solutie.id}>
-                      {solutie.nume || solutie.denumire || solutie.descriere}
-                    </option>
-                  ))}
-                </select>
+                />
               </div>
             </div>
-          )}
-        </div>
 
+            {/* ACT SESIZARE */}
+            <h3 className="section-title">Act sesizare</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Număr act sesizare</label>
+                <input
+                  type="text"
+                  name="numarActSesizare"
+                  className="input"
+                  value={formData.numarActSesizare}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Data act sesizare</label>
+                <input
+                  type="date"
+                  name="dataActSesizare"
+                  className="input"
+                  value={formData.dataActSesizare}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECȚIUNEA 2 – FAPTA */}
+          <div className="form-section">
+            <h3 className="section-title">Descrierea faptei</h3>
+
+            <div className="form-group">
+              <label>Descriere faptă *</label>
+              <textarea
+                name="descriereFapta"
+                className="textarea"
+                rows="5"
+                value={formData.descriereFapta}
+                onChange={handleInputChange}
+                required
+              />
+            </div>
+
+            {loadingNomenclatoare ? (
+              <p>Se încarcă...</p>
+            ) : (
+              <div className="form-group">
+                <label>Abatere disciplinară</label>
+                <select
+                  name="abatereDisciplinaraId"
+                  className="select"
+                  value={formData.abatereDisciplinaraId}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Selectează</option>
+                  {nomenclatoare.abatereDisciplinara.map((abatere) => (
+                    <option key={abatere.id} value={abatere.id}>
+                      {abatere.nume || abatere.denumire || abatere.descriere}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
+            <h3 className="section-title">Perioada faptei</h3>
+            <div className="form-grid">
+              <div className="form-group">
+                <label>Data început</label>
+                <input
+                  type="date"
+                  name="perioadaStart"
+                  className="input"
+                  value={formData.perioadaStart}
+                  onChange={handleInputChange}
+                />
+              </div>
+
+              <div className="form-group">
+                <label>Data sfârșit</label>
+                <input
+                  type="date"
+                  name="perioadaSfarsit"
+                  className="input"
+                  value={formData.perioadaSfarsit}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* SECȚIUNEA 3 – POLIȚIȘTI CERCETAȚI */}
+          <div className="form-section">
+            <div className="section-header-row">
+              <h3 className="section-title" style={{ margin: 0 }}>Polițiști cercetați</h3>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={adaugaCercetat}
+              >
+                ➕ Adaugă polițist cercetat
+              </button>
+            </div>
+
+            {politistiCercetati.map((politist, index) => (
+              <div key={politist._id} className="card-person">
+                <div className="card-person-header">
+                  <h4>Polițist cercetat {index + 1}</h4>
+                  {politistiCercetati.length > 1 && (
+                    <button
+                      type="button"
+                      className="btn btn-danger-outline"
+                      onClick={() => stergeCercetat(politist._id)}
+                    >
+                      🗑️ Șterge
+                    </button>
+                  )}
+                </div>
+
+                <div className="depabd-search">
+                  <div className="form-group">
+                    <label>CNP</label>
+                    <input
+                      type="text"
+                      className="input"
+                      maxLength="13"
+                      value={politist.cnp}
+                      onChange={(e) => handleCercetatChange(politist._id, 'cnp', e.target.value)}
+                    />
+                  </div>
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => cautaInDEPABD('cercetat', politist._id)}
+                  >
+                    🔍 Caută
+                  </button>
+                </div>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Grad *</label>
+                    <input
+                      type="text"
+                      className="input"
+                      value={politist.grad}
+                      onChange={(e) => handleCercetatChange(politist._id, 'grad', e.target.value)}
+                      required
+                    />
+                  </div>
+                  {/* ... Restul câmpurilor (Nume, Prenume, Unitate etc.) rămân identice ... */}
+                   <div className="form-group">
+                      <label>Nume *</label>
+                      <input type="text" className="input" value={politist.nume} onChange={(e) => handleCercetatChange(politist._id, 'nume', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Prenume *</label>
+                      <input type="text" className="input" value={politist.prenume} onChange={(e) => handleCercetatChange(politist._id, 'prenume', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Unitate *</label>
+                      <input type="text" className="input" value={politist.unitate} onChange={(e) => handleCercetatChange(politist._id, 'unitate', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Funcție *</label>
+                      <input type="text" className="input" value={politist.functie} onChange={(e) => handleCercetatChange(politist._id, 'functie', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Corp profesional *</label>
+                      <input type="text" className="input" value={politist.corp} onChange={(e) => handleCercetatChange(politist._id, 'corp', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Domeniu *</label>
+                      <input type="text" className="input" value={politist.domeniu} onChange={(e) => handleCercetatChange(politist._id, 'domeniu', e.target.value)} required />
+                   </div>
+                   <div className="form-group">
+                      <label>Aviz Judiciar</label>
+                      <input type="text" className="input" value={politist.avizJudiciar} onChange={(e) => handleCercetatChange(politist._id, 'avizJudiciar', e.target.value)} />
+                   </div>
+                   <div className="form-group">
+                      <label>Rol *</label>
+                      <select className="select" value={politist.rolId} onChange={(e) => handleCercetatChange(politist._id, 'rolId', e.target.value)} required>
+                         <option value="">Selectează</option>
+                         {nomenclatoare.rolCercertare.map((rol) => (<option key={rol.id} value={rol.id}>{rol.nume || rol.denumire || rol.descriere}</option>))}
+                      </select>
+                   </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* SECȚIUNEA 4 – POLIȚIȘTI DESEMNAȚI */}
+          <div className="form-section">
+            <div className="section-header-row">
+              <h3 className="section-title" style={{ margin: 0 }}>Polițiști desemnați</h3>
+              <button
+                type="button"
+                className="btn btn-primary"
+                onClick={adaugaDesemnat}
+              >
+                ➕ Adaugă polițist desemnat
+              </button>
+            </div>
+
+            {politistiDesemnati.map((politist, index) => (
+              <div key={politist._id} className="card-person">
+                 <div className="card-person-header">
+                    <h4>Polițist desemnat {index + 1}</h4>
+                    {politistiDesemnati.length > 1 && (
+                      <button type="button" className="btn btn-danger-outline" onClick={() => stergeDesemnat(politist._id)}>
+                        🗑️ Șterge
+                      </button>
+                    )}
+                 </div>
+                 {/* Logică identică search DEPABD pt desemnați... */}
+                 <div className="depabd-search">
+                    <div className="form-group">
+                       <label>CNP</label>
+                       <input type="text" className="input" maxLength="13" value={politist.cnp} onChange={(e) => handleDesemnatChange(politist._id, 'cnp', e.target.value)} />
+                    </div>
+                    <button type="button" className="btn btn-secondary" onClick={() => cautaInDEPABD('desemnat', politist._id)}>🔍 Caută</button>
+                 </div>
+                 {/* Grid câmpuri pt desemnați... (prescurtat pentru claritate, este identic cu logica anterioară) */}
+                 <div className="form-grid">
+                     <div className="form-group"><label>Grad *</label><input type="text" className="input" value={politist.grad} onChange={(e) => handleDesemnatChange(politist._id, 'grad', e.target.value)} required /></div>
+                     <div className="form-group"><label>Nume *</label><input type="text" className="input" value={politist.nume} onChange={(e) => handleDesemnatChange(politist._id, 'nume', e.target.value)} required /></div>
+                     <div className="form-group"><label>Prenume *</label><input type="text" className="input" value={politist.prenume} onChange={(e) => handleDesemnatChange(politist._id, 'prenume', e.target.value)} required /></div>
+                     <div className="form-group"><label>Unitate *</label><input type="text" className="input" value={politist.unitate} onChange={(e) => handleDesemnatChange(politist._id, 'unitate', e.target.value)} required /></div>
+                     <div className="form-group"><label>Funcție *</label><input type="text" className="input" value={politist.functie} onChange={(e) => handleDesemnatChange(politist._id, 'functie', e.target.value)} required /></div>
+                     <div className="form-group"><label>Corp profesional *</label><input type="text" className="input" value={politist.corp} onChange={(e) => handleDesemnatChange(politist._id, 'corp', e.target.value)} required /></div>
+                     <div className="form-group"><label>Domeniu *</label><input type="text" className="input" value={politist.domeniu} onChange={(e) => handleDesemnatChange(politist._id, 'domeniu', e.target.value)} required /></div>
+                     <div className="form-group"><label>Aviz Judiciar</label><input type="text" className="input" value={politist.avizJudiciar} onChange={(e) => handleDesemnatChange(politist._id, 'avizJudiciar', e.target.value)} /></div>
+                     <div className="form-group"><label>Rol *</label><select className="select" value={politist.rolId} onChange={(e) => handleDesemnatChange(politist._id, 'rolId', e.target.value)} required><option value="">Selectează</option>{nomenclatoare.rolCercertare.map((rol) => (<option key={rol.id} value={rol.id}>{rol.nume || rol.denumire || rol.descriere}</option>))}</select></div>
+                 </div>
+              </div>
+            ))}
+          </div>
+
+          {/* SECȚIUNEA 5 – RAPORT & SOLUȚII */}
+          <div className="form-section">
+            <h3 className="section-title">Raport cercetare & Soluții</h3>
+            <div className="form-grid">
+               <div className="form-group"><label>Număr raport</label><input type="text" name="numarRaport" className="input" value={formData.numarRaport} onChange={handleInputChange} /></div>
+               <div className="form-group"><label>Data raport</label><input type="date" name="dataRaport" className="input" value={formData.dataRaport} onChange={handleInputChange} /></div>
+               <div className="form-group"><label>Număr hotărâre</label><input type="text" name="numarHotarare" className="input" value={formData.numarHotarare} onChange={handleInputChange} /></div>
+               <div className="form-group"><label>Data hotărâre</label><input type="date" name="dataHotarare" className="input" value={formData.dataHotarare} onChange={handleInputChange} /></div>
+               <div className="form-group"><label>Număr recompensă</label><input type="text" name="numarRecompensa" className="input" value={formData.numarRecompensa} onChange={handleInputChange} /></div>
+               <div className="form-group"><label>Data recompensă</label><input type="date" name="dataRecompensa" className="input" value={formData.dataRecompensa} onChange={handleInputChange} /></div>
+            </div>
+
+            <h3 className="section-title" style={{marginTop: '20px'}}>Concluzii</h3>
+             {loadingNomenclatoare ? (
+               <p>Se încarcă listele de soluții...</p>
+             ) : (
+               <div className="form-grid">
+                 <div className="form-group">
+                   <label>Soluție raport</label>
+                   <select name="solutieRaportId" className="select" value={formData.solutieRaportId} onChange={handleInputChange}>
+                     <option value="">Selectează</option>
+                     {nomenclatoare.solutiiRaport.map((s) => (<option key={s.id} value={s.id}>{s.nume || s.denumire || s.descriere}</option>))}
+                   </select>
+                 </div>
+                 {/* ... Restul select-urilor pentru soluții (propusă, șef, consultare, restituire) rămân la fel */}
+                 <div className="form-group"><label>Soluție propusă</label><select name="solutiePropusaId" className="select" value={formData.solutiePropusaId} onChange={handleInputChange}><option value="">Selectează</option>{nomenclatoare.solutiiPropuse.map((s) => (<option key={s.id} value={s.id}>{s.nume || s.denumire || s.descriere}</option>))}</select></div>
+                 <div className="form-group"><label>Soluție șef</label><select name="solutieSefId" className="select" value={formData.solutieSefId} onChange={handleInputChange}><option value="">Selectează</option>{nomenclatoare.solutiiSef.map((s) => (<option key={s.id} value={s.id}>{s.nume || s.denumire || s.descriere}</option>))}</select></div>
+                 <div className="form-group"><label>Soluție consultare</label><select name="solutieConsultareId" className="select" value={formData.solutieConsultareId} onChange={handleInputChange}><option value="">Selectează</option>{nomenclatoare.solutiiConsultare.map((s) => (<option key={s.id} value={s.id}>{s.nume || s.denumire || s.descriere}</option>))}</select></div>
+                 <div className="form-group"><label>Soluție restituire</label><select name="solutieRestituireId" className="select" value={formData.solutieRestituireId} onChange={handleInputChange}><option value="">Selectează</option>{nomenclatoare.solutiiRestituire.map((s) => (<option key={s.id} value={s.id}>{s.nume || s.denumire || s.descriere}</option>))}</select></div>
+               </div>
+             )}
+          </div>
+
+          {/* PAGE FOOTER - BUTOANE ACȚIUNE */}
+          <div className="page-footer-actions">
+            <button type="button" className="btn btn-secondary btn-large" onClick={handleBack}>
+              Anulează
+            </button>
+            <button type="submit" className="btn btn-primary btn-large">
+              💾 Salvează cercetarea
+            </button>
+          </div>
+
+        </form>
       </div>
-
-      {/* FOOTER */}
-      <div className="modal-footer">
-        <button type="button" className="btn btn-secondary" onClick={onClose}>
-          Anulează
-        </button>
-        <button type="submit" className="btn btn-primary">
-          💾 Salvează cercetarea
-        </button>
-      </div>
-
-    </form>
-
-  </div>
-</div>);
+    </div>
+);
 };
 export default AdaugaCercetareModal;
