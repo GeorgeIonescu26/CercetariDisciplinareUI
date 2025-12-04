@@ -65,19 +65,12 @@ const CercetareDisciplinara = () => {
   };
 
   // Extrage polițistul cercetat (cu nRolCercetareId = 1)
-  const getPolitistCercetat = (cercetare) => {
-    if (!cercetare || !cercetare.politisti || cercetare.politisti.length === 0) {
-      return null;
+  const getPolitistiCercetati = (cercetare) => {
+    if (!cercetare || !cercetare.politisti) {
+      return [];
     }
   
-    // Caută polițistul cu rolul 1 (cercetat)
-    const politistCercetat = cercetare.politisti.find(p => p.nRolCercetareResponse.denumire === "cercetat");
-
-    if (!politistCercetat || !politistCercetat.politist) {
-      return null;
-    }
-    
-    return politistCercetat.politist;
+    return cercetare.politisti.filter(p => p.nRolCercetareResponse.denumire === "cercetat");;
   };
 
   // Extrage membrii comisiei (cu nRolCercetareId != 1)
@@ -88,15 +81,12 @@ const CercetareDisciplinara = () => {
     return cercetare.politisti.filter(p => p.nRolCercetareResponse.denumire === "membru comisie");
   };
 
-  const getPolitistDesemnat = (cercetare) => { debugger;
-    if (!cercetare || !cercetare.politisti || cercetare.politisti.length === 0) {
-      return null;
+  const getPolitistiDesemnati = (cercetare) => { debugger;
+    if (!cercetare || !cercetare.politisti) {
+      return [];
     }
     
-    const politistDesemnat = cercetare.politisti.find(p => p.nRolCercetareResponse.denumire === "desemnat");
-    if(!politistDesemnat || !politistCercetat.politist) return null;
-
-    return politistDesemnat.politist;
+    return cercetare.politisti.filter(p => p.nRolCercetareResponse.denumire === "desemnat");;
   };
 
   // Calculare status cercetare
@@ -125,36 +115,39 @@ const CercetareDisciplinara = () => {
 
   // ============ FILTERING & STATISTICS ============
   
-  const cercetariFiltrate = cercetari.filter(cercetare => {
-    // Filtrare text (număr cercetare sau nume polițist)
-    if (filters.searchText) {
-      const searchLower = filters.searchText.toLowerCase();
-      const politist = getPolitistCercetat(cercetare);
-      const numeComplet = politist ? `${politist.nume} ${politist.prenume}`.toLowerCase() : '';
-      
-      if (!cercetare.numar.toLowerCase().includes(searchLower) && 
-          !numeComplet.includes(searchLower)) {
-        return false;
-      }
-    }
-
-    // Filtrare status
-    if (filters.status && getCercetareStatus(cercetare) !== filters.status) {
+ const cercetariFiltrate = cercetari.filter(cercetare => {
+  // Filtrare text (număr cercetare sau nume polițist)
+  if (filters.searchText) {
+    const searchLower = filters.searchText.toLowerCase();
+    const politistiCercetati = getPolitistiCercetati(cercetare);
+    
+    const numeMatch = politistiCercetati.some(pc => {
+      const numeComplet = `${pc.politist.nume} ${pc.politist.prenume}`.toLowerCase();
+      return numeComplet.includes(searchLower);
+    });
+    
+    if (!cercetare.numar.toLowerCase().includes(searchLower) && !numeMatch) {
       return false;
     }
+  }
 
-    // Filtrare dată început
-    if (filters.dataStart && cercetare.data < filters.dataStart) {
-      return false;
-    }
+  // Filtrare status
+  if (filters.status && getCercetareStatus(cercetare) !== filters.status) {
+    return false;
+  }
 
-    // Filtrare dată sfârșit
-    if (filters.dataEnd && cercetare.data > filters.dataEnd) {
-      return false;
-    }
+  // Filtrare dată început
+  if (filters.dataStart && cercetare.data < filters.dataStart) {
+    return false;
+  }
 
-    return true;
-  });
+  // Filtrare dată sfârșit
+  if (filters.dataEnd && cercetare.data > filters.dataEnd) {
+    return false;
+  }
+
+  return true;
+});
 
   // Calculare statistici
   const statistici = {
@@ -187,8 +180,8 @@ const CercetareDisciplinara = () => {
 
   // ============ GET SELECTED DATA ============
   const cercetareSelectata = cercetari.find(c => c.id === selectedCercetareId);
-  const politistCercetat = cercetareSelectata ? getPolitistCercetat(cercetareSelectata) : null;
-  const politistDesemnat = cercetareSelectata ? getPolitistDesemnat(cercetareSelectata) : null;
+  const politistiCercetati = cercetareSelectata ? getPolitistiCercetati(cercetareSelectata) : [];
+  const politistiDesemnati = cercetareSelectata ? getPolitistiDesemnati(cercetareSelectata) : []
   const membriComisie = cercetareSelectata ? getMembriComisie(cercetareSelectata) : [];
 
   // ============ RENDER LOADING/ERROR STATES ============
@@ -346,37 +339,38 @@ const CercetareDisciplinara = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {cercetariFiltrate.map(cercetare => {
-                    const status = getCercetareStatus(cercetare);
-                    const statusBadge = getStatusBadge(status);
-                    const politist = getPolitistCercetat(cercetare);
-                    const isSelected = cercetare.id === selectedCercetareId;
+                {cercetariFiltrate.map(cercetare => {
+                  const status = getCercetareStatus(cercetare);
+                  const statusBadge = getStatusBadge(status);
+                  const politistiCercetati = getPolitistiCercetati(cercetare);
+                  const primulPolitistCercetat = politistiCercetati.length > 0 ? politistiCercetati[0].politist : null;
+                  const isSelected = cercetare.id === selectedCercetareId;
 
-                    return (
-                      <tr 
-                        key={cercetare.id} 
-                        className={isSelected ? 'selected' : ''}
-                        onClick={() => handleSelectCercetare(cercetare.id)}
-                        style={{ cursor: 'pointer' }}
-                      >
-                        <td><strong>{cercetare.numar}</strong></td>
-                        <td>{formatDate(cercetare.data)}</td>
-                        <td>{politistCercetat?.grad || '-'}</td>
-                        <td>
-                          {politistCercetat
-                            ? `${politistCercetat.nume} ${politistCercetat.prenume}` 
-                            : <em>Nu este specificat</em>}
-                        </td>
-                        <td>{politistCercetat?.functie || '-'}</td>
-                        <td>{politistCercetat?.unitate || '-'}</td>
-                        <td>
-                          <span className={`status ${statusBadge.class}`}>
-                            {statusBadge.label}
-                          </span>
-                        </td>                
-                      </tr>
-                    );
-                  })}
+                  return (
+                    <tr 
+                      key={cercetare.id} 
+                      className={isSelected ? 'selected' : ''}
+                      onClick={() => handleSelectCercetare(cercetare.id)}
+                      style={{ cursor: 'pointer' }}
+                    >
+                      <td><strong>{cercetare.numar}</strong></td>
+                      <td>{formatDate(cercetare.data)}</td>
+                      <td>{primulPolitistCercetat?.grad || '-'}</td>
+                      <td>
+                        {primulPolitistCercetat
+                          ? `${primulPolitistCercetat.nume} ${primulPolitistCercetat.prenume}` 
+                          : <em>Nu este specificat</em>}
+                      </td>
+                      <td>{primulPolitistCercetat?.functie || '-'}</td>
+                      <td>{primulPolitistCercetat?.unitate || '-'}</td>
+                      <td>
+                        <span className={`status ${statusBadge.class}`}>
+                          {statusBadge.label}
+                        </span>
+                      </td>                
+                    </tr>
+                  );
+                })}
                 </tbody>
               </table>
             )}
@@ -489,86 +483,93 @@ const CercetareDisciplinara = () => {
                 </div>
               )}
 
-              {/* TAB: Polițiști Cercetati */}
-              {activeTab === 'politistCercetat' && (
-                <div className="pane active">
-                  
-                  {/* Polițist cercetat */}
-                  {politistCercetat && (
-                    <div className="subsection">
-                      <h4 className="subsection-title">👤 Polițist cercetat</h4>
-                      <div className="kv">
-                        <div className="kv-label">Grad</div>
-                        <div className="kv-value">{politistCercetat.grad}</div>
+             {/* TAB: Polițiști Cercetați */}
+                {activeTab === 'politistCercetat' && (
+                  <div className="pane active">
+                    {politistiCercetati.length > 0 ? (
+                      <div className="subsection">
+                        <h4 className="subsection-title">👤 Polițiști cercetați ({politistiCercetati.length})</h4>
+                        <div className="membri-list">
+                          {politistiCercetati.map((pc, index) => (
+                            <div key={pc.id} className="membru-card">
+                              <div className="membru-header">
+                                <strong>{index + 1}. {pc.politist.grad} {pc.politist.nume} {pc.politist.prenume}</strong>
+                              </div>
+                              <div className="kv">
+                                <div className="kv-label">Funcție</div>
+                                <div className="kv-value">{pc.politist.functie}</div>
 
-                        <div className="kv-label">Nume și prenume</div>
-                        <div className="kv-value">
-                          <strong>{politistCercetat.nume} {politistCercetat.prenume}</strong>
+                                <div className="kv-label">Corp</div>
+                                <div className="kv-value">{pc.politist.corp}</div>
+
+                                <div className="kv-label">Domeniu</div>
+                                <div className="kv-value">{pc.politist.domeniu}</div>
+
+                                <div className="kv-label">Unitate</div>
+                                <div className="kv-value">{pc.politist.unitate}</div>
+
+                                {pc.politist.avizJudiciar && (
+                                  <>
+                                    <div className="kv-label">Aviz judiciar</div>
+                                    <div className="kv-value">{pc.politist.avizJudiciar}</div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
                         </div>
-
-                        <div className="kv-label">Funcție</div>
-                        <div className="kv-value">{politistCercetat.functie}</div>
-
-                        <div className="kv-label">Corp</div>
-                        <div className="kv-value">{politistCercetat.corp}</div>
-
-                        <div className="kv-label">Domeniu</div>
-                        <div className="kv-value">{politistCercetat.domeniu}</div>
-
-                        <div className="kv-label">Unitate</div>
-                        <div className="kv-value">{politistCercetat.unitate}</div>
-
-                        {politistCercetat.avizJudiciar && (
-                          <>
-                            <div className="kv-label">Aviz judiciar</div>
-                            <div className="kv-value">{politistCercetat.avizJudiciar}</div>
-                          </>
-                        )}
                       </div>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              {/* TAB: Polițiști Desemnat */}
-              {activeTab === 'politistDesemnat' && (
-                <div className="pane active">
-                  {/* Polițist desemnat */}
-                  {politistDesemnat && (
-                    <div className="subsection">
-                      <h4 className="subsection-title">👤 Polițist desemnat</h4>
-                      <div className="kv">
-                        <div className="kv-label">Grad</div>
-                        <div className="kv-value">{politistDesemnat.grad}</div>
-
-                        <div className="kv-label">Nume și prenume</div>
-                        <div className="kv-value">
-                          <strong>{politistDesemnat.nume} {politistDesemnat.prenume}</strong>
-                        </div>
-
-                        <div className="kv-label">Funcție</div>
-                        <div className="kv-value">{politistDesemnat.functie}</div>
-
-                        <div className="kv-label">Corp</div>
-                        <div className="kv-value">{politistDesemnat.corp}</div>
-
-                        <div className="kv-label">Domeniu</div>
-                        <div className="kv-value">{politistDesemnat.domeniu}</div>
-
-                        <div className="kv-label">Unitate</div>
-                        <div className="kv-value">{politistDesemnat.unitate}</div>
-
-                        {politistDesemnat.avizJudiciar && (
-                          <>
-                            <div className="kv-label">Aviz judiciar</div>
-                            <div className="kv-value">{politistDesemnat.avizJudiciar}</div>
-                          </>
-                        )}
+                    ) : (
+                      <div className="empty-state">
+                        <p>Nu sunt polițiști cercetați asociați acestei cercetări.</p>
                       </div>
-                    </div>
-                  )}
+                    )}
                   </div>
-                  )}
+                )}
+
+                {/* TAB: Polițiști Desemnați */}
+                {activeTab === 'politistDesemnat' && (
+                  <div className="pane active">
+                    {politistiDesemnati.length > 0 ? (
+                      <div className="subsection">
+                        <h4 className="subsection-title">👤 Polițiști desemnați ({politistiDesemnati.length})</h4>
+                        <div className="membri-list">
+                          {politistiDesemnati.map((pd, index) => (
+                            <div key={pd.id} className="membru-card">
+                              <div className="membru-header">
+                                <strong>{index + 1}. {pd.politist.grad} {pd.politist.nume} {pd.politist.prenume}</strong>
+                              </div>
+                              <div className="kv">
+                                <div className="kv-label">Funcție</div>
+                                <div className="kv-value">{pd.politist.functie}</div>
+
+                                <div className="kv-label">Corp</div>
+                                <div className="kv-value">{pd.politist.corp}</div>
+
+                                <div className="kv-label">Domeniu</div>
+                                <div className="kv-value">{pd.politist.domeniu}</div>
+
+                                <div className="kv-label">Unitate</div>
+                                <div className="kv-value">{pd.politist.unitate}</div>
+
+                                {pd.politist.avizJudiciar && (
+                                  <>
+                                    <div className="kv-label">Aviz judiciar</div>
+                                    <div className="kv-value">{pd.politist.avizJudiciar}</div>
+                                  </>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="empty-state">
+                        <p>Nu sunt polițiști desemnați asociați acestei cercetări.</p>
+                      </div>
+                    )}
+                  </div>
+                )}
 
                   {/* TAB: Membrii comisiei */}
               {activeTab === 'membriiComisiei' && (
@@ -594,7 +595,7 @@ const CercetareDisciplinara = () => {
                     </div>
                   )}
 
-                  {!politistCercetat && membriComisie.length === 0 && (
+                  {!politistiCercetati && membriComisie.length === 0 && (
                     <div className="empty-state">
                       <p>Nu sunt polițiști asociați acestei cercetări.</p>
                     </div>
